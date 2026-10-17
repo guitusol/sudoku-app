@@ -150,6 +150,14 @@ class SudokuApp {
           this.setCellValue(this.selectedRow, this.selectedCol, 0);
         } else if (val === 'posibles') {
           this.togglePosibles();
+        } else if (val === 'up') {
+          this.selectCell(Math.max(0, this.selectedRow - 1), this.selectedCol);
+        } else if (val === 'down') {
+          this.selectCell(Math.min(8, this.selectedRow + 1), this.selectedCol);
+        } else if (val === 'left') {
+          this.selectCell(this.selectedRow, Math.max(0, this.selectedCol - 1));
+        } else if (val === 'right') {
+          this.selectCell(this.selectedRow, Math.min(8, this.selectedCol + 1));
         } else {
           const num = parseInt(val, 10);
           if (num >= 1 && num <= 9) {
@@ -326,6 +334,7 @@ class SudokuApp {
       this.playGrid[row][col] = num;
       this.initialGrid[row][col] = num;
       this.updateBoardDisplay();
+      this.advanceToNextCell(row, col);
       return;
     }
 
@@ -343,6 +352,34 @@ class SudokuApp {
       // Comprobar si completó el Sudoku
       if (this.engine.isCompleted(this.playGrid)) {
         this.handleGameWon();
+      } else {
+        this.advanceToNextCell(row, col);
+      }
+    }
+  }
+
+  /**
+   * Avance automático inteligente: Salta a la siguiente casilla vacía hacia la derecha
+   */
+  advanceToNextCell(currentRow, currentCol) {
+    // 1. Buscar hacia adelante desde la casilla actual
+    for (let r = currentRow; r < 9; r++) {
+      const startC = (r === currentRow) ? currentCol + 1 : 0;
+      for (let c = startC; c < 9; c++) {
+        if (this.playGrid[r][c] === 0) {
+          this.selectCell(r, c);
+          return;
+        }
+      }
+    }
+    // 2. Si llegó al final, buscar desde el principio (casillas que hayan quedado atrás)
+    for (let r = 0; r <= currentRow; r++) {
+      const endC = (r === currentRow) ? currentCol : 9;
+      for (let c = 0; c < endC; c++) {
+        if (this.playGrid[r][c] === 0) {
+          this.selectCell(r, c);
+          return;
+        }
       }
     }
   }
